@@ -38,8 +38,28 @@
 
 ## 快速开始
 
+### 用预编译产物（最快）
+
+[**Releases**](https://github.com/Sharelter/waveshare-esp32-s3-rlcd-4.2-dashboard/releases)
+里放了可以直接用的东西，这是最快的上手方式：
+
+| 文件 | 说明 |
+| --- | --- |
+| `rlcd-dash-*-esp32s3-full.bin.gz` | 完整镜像（bootloader + 分区表 + 应用），写到 `0x0`。 |
+| `rlcd-dash-*-app.bin` | 只有固件，用于升级已有安装且不清空设置，写到 `0x10000`。 |
+| `rlcd-host-*-x86_64-linux` | 静态链接的主机端，不依赖 glibc。 |
+
 ```bash
-git clone https://github.com/<you>/waveshare-esp32-s3-rlcd-4.2-dashboard.git
+gunzip rlcd-dash-1.0.0-esp32s3-full.bin.gz
+esptool --chip esp32s3 -p /dev/ttyACM0 write-flash 0x0 rlcd-dash-1.0.0-esp32s3-full.bin
+```
+
+然后装上主机端二进制就能跑，不需要任何工具链。
+
+### 从源码构建
+
+```bash
+git clone https://github.com/Sharelter/waveshare-esp32-s3-rlcd-4.2-dashboard.git
 cd waveshare-esp32-s3-rlcd-4.2-dashboard
 
 # 1) Arduino ESP32 工具链 + U8g2（约 890 MB，可断点续传）

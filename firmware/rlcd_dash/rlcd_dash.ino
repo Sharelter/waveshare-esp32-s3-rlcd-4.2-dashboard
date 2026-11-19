@@ -15,6 +15,10 @@
 #include "shtc3.h"
 #include "st7305_u8g2.h"
 
+// Bumped for tagged releases; printed in the boot banner so a user can tell
+// which build is actually on the board.
+#define RLCD_DASH_VERSION "1.0.0"
+
 // The board's KEY button: pulled up, shorts to GND when pressed.
 #define KEY_PIN 18
 #define KEY_DEBOUNCE_MS 30
@@ -216,9 +220,9 @@ void setup() {
   fps_window_ms = millis();
 
   Serial.println();
-  Serial.printf("rlcd_dash ready  panel=%dx%d  payload=%u bytes  frame=%u bytes  theme=%s\r\n",
-                RLCD_PANEL_W, RLCD_PANEL_H, (unsigned)DASH_PAYLOAD_LEN, (unsigned)DASH_FRAME_LEN,
-                invert_mode ? "light" : "dark");
+  Serial.printf("rlcd_dash %s ready  panel=%dx%d  payload=%u bytes  frame=%u bytes  theme=%s\r\n",
+                RLCD_DASH_VERSION, RLCD_PANEL_W, RLCD_PANEL_H, (unsigned)DASH_PAYLOAD_LEN,
+                (unsigned)DASH_FRAME_LEN, invert_mode ? "light" : "dark");
   Serial.printf("KEY (GPIO%d) toggles black-on-white / white-on-black\r\n", KEY_PIN);
   Serial.printf("SHTC3 %s  id=0x%04X  i2c sda=%d scl=%d\r\n", have_env ? "ok" : "NOT FOUND",
                 board_env.id(), SHTC3_SDA_PIN, SHTC3_SCL_PIN);

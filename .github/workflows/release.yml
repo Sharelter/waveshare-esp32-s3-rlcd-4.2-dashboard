@@ -1,0 +1,128 @@
+name: release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: build and publish
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Install arduino-cli
+        run: |
+          mkdir -p "$HOME/.local/bin"
+          curl -fsSL -o /tmp/arduino-cli.tar.gz \
+            "https://github.com/arduino/arduino-cli/releases/download/v1.2.2/arduino-cli_1.2.2_Linux_64bit.tar.gz"
+          tar -xzf /tmp/arduino-cli.tar.gz -C "$HOME/.local/bin" arduino-cli
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      - name: Cache arduino packages and libraries
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.arduino15/packages
+            ~/.arduino15/staging
+            ~/Arduino/libraries
+          key: arduino-${{ runner.os }}-esp32-3.3.0-u8g2-2.36.18
+
+      - name: Install ESP32 core and U8g2
+        run: |
+          arduino-cli config init --overwrite
+          arduino-cli config add board_manager.additional_urls \
+            https://espressif.github.io/arduino-esp32/package_esp32_index.json
+          arduino-cli core update-index
+          arduino-cli core install esp32:esp32@3.3.0
+          arduino-cli lib install U8g2@2.36.18
+
+      # --output-dir also emits .merged.bin, a complete image that can be written
+      # in one shot at 0x0.
+      - name: Compile firmware
+        run: |
+          arduino-cli compile \
+            --fqbn "esp32:esp32:esp32s3:USBMode=hwcdc,CDCOnBoot=cdc,FlashSize=16M,FlashMode=qio,PartitionScheme=huge_app,PSRAM=disabled,CPUFreq=240" \
+            --output-dir build firmware/rlcd_dash
+
+      - name: Install Rust
+        run: rustup toolchain install stable --profile minimal && rustup default stable && rustup target add x86_64-unknown-linux-musl
+
+      # musl + rust-lld gives a fully static binary that runs on any distro.
+      - name: Build host daemon
+        working-directory: host-rust
+        run: cargo build --release --target x86_64-unknown-linux-musl
+
+      - name: Assemble assets
+        run: |
+          set -euo pipefail
+          VERSION="${GITHUB_REF_NAME#v}"
+          mkdir -p dist
+          cp build/rlcd_dash.ino.merged.bin "dist/rlcd-dash-${VERSION}-esp32s3-full.bin"
+          gzip -9 "dist/rlcd-dash-${VERSION}-esp32s3-full.bin"
+          cp build/rlcd_dash.ino.bin "dist/rlcd-dash-${VERSION}-app.bin"
+          cp host-rust/target/x86_64-unknown-linux-musl/release/rlcd-host \
+             "dist/rlcd-host-${VERSION}-x86_64-linux"
+          (cd dist && sha256sum * > SHA256SUMS)
+          ls -lh dist
+
+      - name: Compose release notes
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          cat > notes.md <<EOF
+          ## Firmware
+
+          Download \`rlcd-dash-${VERSION}-esp32s3-full.bin.gz\` and flash it in one shot:
+
+          \`\`\`bash
+          gunzip rlcd-dash-${VERSION}-esp32s3-full.bin.gz
+          pip install esptool
+          esptool --chip esp32s3 -p /dev/ttyACM0 write-flash 0x0 rlcd-dash-${VERSION}-esp32s3-full.bin
+          \`\`\`
+
+          The full image includes the bootloader and partition table, so it works on a
+          board straight out of the box. It erases NVS, which means the KEY-button
+          theme choice resets to the default.
+
+          To update an existing install without wiping settings, write
+          \`rlcd-dash-${VERSION}-app.bin\` at 0x10000 instead:
+
+          \`\`\`bash
+          esptool --chip esp32s3 -p /dev/ttyACM0 write-flash 0x10000 rlcd-dash-${VERSION}-app.bin
+          \`\`\`
+
+          Built from \`${GITHUB_REF_NAME}\` with Arduino ESP32 core 3.3.0 and U8g2 2.36.18.
+          After flashing, the serial banner reports the version:
+          \`rlcd_dash ${VERSION} ready ...\`
+
+          ## Host daemon
+
+          \`rlcd-host-${VERSION}-x86_64-linux\` is a fully static x86-64 binary (glibc-free,
+          musl-linked), so it runs on any Linux distribution:
+
+          \`\`\`bash
+          chmod +x rlcd-host-${VERSION}-x86_64-linux
+          sudo install -m 0755 rlcd-host-${VERSION}-x86_64-linux /usr/local/bin/rlcd-host
+          rlcd-host --help
+          \`\`\`
+
+          For systemd, see [section 3 of the README](https://github.com/${GITHUB_REPOSITORY}#3-用-systemd-常驻推荐).
+
+          ## Verify
+
+          \`\`\`bash
+          sha256sum -c SHA256SUMS
+          \`\`\`
+          EOF
+
+      - name: Publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" dist/* \
+            --title "$GITHUB_REF_NAME" \
+            --notes-file notes.md \
+            --verify-tag

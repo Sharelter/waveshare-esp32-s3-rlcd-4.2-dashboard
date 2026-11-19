@@ -43,8 +43,28 @@ No wiring is needed — everything above is on the board.
 
 ## Quick start
 
+### Prebuilt binaries
+
+[**Releases**](https://github.com/Sharelter/waveshare-esp32-s3-rlcd-4.2-dashboard/releases)
+carry ready-made artifacts, which is the fastest way to get going:
+
+| Asset | What it is |
+| --- | --- |
+| `rlcd-dash-*-esp32s3-full.bin.gz` | Complete flash image (bootloader + partitions + app). Write at `0x0`. |
+| `rlcd-dash-*-app.bin` | Firmware only, for updating an existing install without wiping settings. Write at `0x10000`. |
+| `rlcd-host-*-x86_64-linux` | Static host daemon, no glibc dependency. |
+
 ```bash
-git clone https://github.com/<you>/waveshare-esp32-s3-rlcd-4.2-dashboard.git
+gunzip rlcd-dash-1.0.0-esp32s3-full.bin.gz
+esptool --chip esp32s3 -p /dev/ttyACM0 write-flash 0x0 rlcd-dash-1.0.0-esp32s3-full.bin
+```
+
+Then install the host binary and run it — no toolchain required.
+
+### From source
+
+```bash
+git clone https://github.com/Sharelter/waveshare-esp32-s3-rlcd-4.2-dashboard.git
 cd waveshare-esp32-s3-rlcd-4.2-dashboard
 
 # 1. Arduino ESP32 toolchain + U8g2 (downloads ~890 MB, resumable)
