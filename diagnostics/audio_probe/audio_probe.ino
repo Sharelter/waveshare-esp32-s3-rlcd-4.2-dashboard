@@ -1,5 +1,6 @@
 // Diagnostic only: drive the ES7210 through the vendor's own stack
-// (codec_bsp -> codec_board -> esp_codec_dev -> i2c_bsp) with none of our code
+// (codec_bsp -> codec_board -> esp_codec_dev -> i2c_bsp), bypassing the
+// dashboard's own audio code entirely
 // in the path.  If this also reads digital silence, the fault is not in our
 // ES7210 integration.
 #include "codec_bsp.h"

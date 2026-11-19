@@ -2,7 +2,7 @@
 #!/usr/bin/env python3
 """Host side of the ESP32-S3-RLCD-4.2 load dashboard.
 
-Samples CPU / memory / network on this machine and pushes a compact binary
+Samples CPU / memory / network on the host and pushes a compact binary
 frame to the board's native USB serial port (USB-Serial-JTAG) at a steady
 30 Hz.  The board renders it on the 300x400 reflective LCD.
 

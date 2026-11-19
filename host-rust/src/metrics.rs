@@ -368,8 +368,8 @@ pub fn local_hms() -> [u8; 3] {
 // ----------------------------------------------------------- temperature ---
 
 /// Checked in this order -- never in hwmon enumeration order.  ACPI thermal
-/// zones ("acpitz") report a made-up value (a flat 20 C on this machine) and
-/// usually sit at hwmon0, so they must not win over a real die sensor.
+/// zones ("acpitz") frequently report a flat, invented value and usually sit at
+/// hwmon0, so they must not win over a real die sensor.
 const TEMP_PRIORITY: &[&str] = &[
     "k10temp",
     "coretemp",

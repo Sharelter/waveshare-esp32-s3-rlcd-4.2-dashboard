@@ -113,7 +113,8 @@ docs/                   Screenshot
 
 ## Measured
 
-On an AMD Ryzen Z1 Extreme running the board over its native USB:
+Reference numbers from a single machine — an AMD Ryzen Z1 Extreme, board on its
+native USB. Treat them as an order of magnitude, not a guarantee:
 
 | | |
 | --- | --- |
