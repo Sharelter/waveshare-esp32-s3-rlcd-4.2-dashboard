@@ -1,0 +1,19 @@
+# build artefacts
+build/
+host-rust/target/
+
+# toolchain and package caches (see scripts/fetch-toolchain.sh)
+tools/
+
+# upstream reference checkouts
+vendor/
+
+# python
+__pycache__/
+*.py[cod]
+
+# editors / OS
+.vscode/
+.idea/
+*.swp
+.DS_Store

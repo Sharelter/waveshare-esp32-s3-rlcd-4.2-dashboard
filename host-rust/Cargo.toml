@@ -1,0 +1,15 @@
+[package]
+name = "rlcd-host"
+version = "0.1.0"
+edition = "2021"
+description = "Stream host CPU/memory/network load to a Waveshare ESP32-S3-RLCD-4.2"
+license = "MIT"
+
+[dependencies]
+libc = "0.2"
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+strip = true

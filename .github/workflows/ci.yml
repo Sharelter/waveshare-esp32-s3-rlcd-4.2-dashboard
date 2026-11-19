@@ -1,0 +1,72 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  host:
+    name: host daemon (Rust)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust
+        run: rustup toolchain install stable --profile minimal --component rustfmt && rustup default stable
+
+      - name: Check formatting
+        working-directory: host-rust
+        run: cargo fmt --check
+
+      - name: Build
+        working-directory: host-rust
+        run: cargo build --release
+
+      - name: Unit tests
+        working-directory: host-rust
+        run: cargo test --release
+
+      # The protocol is defined twice (protocol.h for the firmware, proto.rs for
+      # the host).  This decodes the Rust daemon's output with the independent
+      # Python implementation, so the two ends cannot drift silently.
+      - name: Cross-check wire format
+        run: python3 scripts/verify-rust-proto.py host-rust/target/release/rlcd-host
+
+  firmware:
+    name: firmware (arduino-cli)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install arduino-cli
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/arduino/arduino-cli/master/install.sh \
+            | BINDIR="$HOME/.local/bin" sh
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      # The ESP32 core plus the Arduino libraries are ~900 MB; caching makes
+      # repeat builds take a couple of minutes instead of ten.
+      - name: Cache arduino packages and libraries
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.arduino15/packages
+            ~/.arduino15/staging
+            ~/Arduino/libraries
+          key: arduino-${{ runner.os }}-esp32-3.3.0-u8g2-2.36.18
+
+      - name: Install ESP32 core and U8g2
+        run: |
+          arduino-cli config init
+          arduino-cli config add board_manager.additional_urls \
+            https://espressif.github.io/arduino-esp32/package_esp32_index.json
+          arduino-cli core update-index
+          arduino-cli core install esp32:esp32@3.3.0
+          arduino-cli lib install U8g2@2.36.18
+
+      - name: Compile
+        run: |
+          arduino-cli compile \
+            --fqbn "esp32:esp32:esp32s3:USBMode=hwcdc,CDCOnBoot=cdc,FlashSize=16M,FlashMode=qio,PartitionScheme=huge_app,PSRAM=disabled,CPUFreq=240" \
+            firmware/rlcd_dash

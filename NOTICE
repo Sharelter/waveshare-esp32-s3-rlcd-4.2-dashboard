@@ -1,0 +1,52 @@
+RLCD Dashboard
+Copyright 2026 the rlcd-dashboard contributors
+
+This product includes software developed at other projects.
+
+--------------------------------------------------------------------------------
+Waveshare ESP32-S3-RLCD-4.2 examples
+--------------------------------------------------------------------------------
+
+  firmware/rlcd_dash/st7305_u8g2.{h,cpp}
+  diagnostics/audio_probe/**
+
+    Derived from https://github.com/waveshareteam/ESP32-S3-RLCD-4.2
+    Copyright (c) Waveshare
+    Licensed under the Apache License, Version 2.0
+
+    st7305_u8g2.{h,cpp} is a reworked version of the vendor example
+    (02_Example/Arduino/10_U8G2_Test/ST7305_U8g2.cpp).  The panel init
+    sequence and the 4-column x 2-row RAM repacking are the vendor's; the
+    class layout, the inversion switch and the error handling are ours.
+    Modifications are marked in the file headers.
+
+    diagnostics/audio_probe/ contains the vendor audio stack verbatim
+    (codec_bsp, i2c_bsp, codec_board, esp_codec_dev) with the music and LVGL
+    parts removed, kept as a diagnostic reference.  See its README.
+
+--------------------------------------------------------------------------------
+esp_codec_dev (ES7210 driver subset)
+--------------------------------------------------------------------------------
+
+  firmware/rlcd_dash/src/**
+
+    https://github.com/espressif/esp-adf/tree/master/components/esp_codec_dev
+    Copyright (c) Espressif Systems (Shanghai) CO LTD
+    Licensed under the Apache License, Version 2.0
+    (diagnostics/audio_probe/.../codec_board is under the Espressif
+    Modified MIT License; see that directory's LICENSE.)
+
+    A subset: only the ES7210 ADC driver and the interfaces it needs.  The
+    I2C transport is ours (src/serial-free ctrl_if in audio_level.cpp) so the
+    codec can share the Arduino Wire bus with the SHTC3.
+
+--------------------------------------------------------------------------------
+U8g2
+--------------------------------------------------------------------------------
+
+  Not vendored.  Installed by scripts/fetch-toolchain.sh from the Arduino
+  Library Manager, pinned to 2.36.18.
+
+    https://github.com/olikraus/u8g2
+    Copyright (c) Oliver Kraus
+    Licensed under the BSD 2-Clause License
