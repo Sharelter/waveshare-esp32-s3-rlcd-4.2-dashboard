@@ -39,10 +39,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Pinned rather than master: CI should not go red because upstream moved.
       - name: Install arduino-cli
         run: |
-          curl -fsSL https://raw.githubusercontent.com/arduino/arduino-cli/master/install.sh \
-            | BINDIR="$HOME/.local/bin" sh
+          mkdir -p "$HOME/.local/bin"
+          curl -fsSL -o /tmp/arduino-cli.tar.gz \
+            "https://github.com/arduino/arduino-cli/releases/download/v1.2.2/arduino-cli_1.2.2_Linux_64bit.tar.gz"
+          tar -xzf /tmp/arduino-cli.tar.gz -C "$HOME/.local/bin" arduino-cli
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
 
       # The ESP32 core plus the Arduino libraries are ~900 MB; caching makes
@@ -58,7 +61,7 @@ jobs:
 
       - name: Install ESP32 core and U8g2
         run: |
-          arduino-cli config init
+          arduino-cli config init --overwrite
           arduino-cli config add board_manager.additional_urls \
             https://espressif.github.io/arduino-esp32/package_esp32_index.json
           arduino-cli core update-index
