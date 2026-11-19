@@ -1,10 +1,11 @@
-# RLCD Dashboard
+# Waveshare ESP32-S3-RLCD-4.2 仪表盘
 
 [English](README.md) · **简体中文**
 
 把这台机器的 **CPU / 内存 / 网络 / 环境音量** 实时推到一块
 [Waveshare ESP32-S3-RLCD-4.2](https://www.waveshare.com/esp32-s3-rlcd-4.2.htm) 上。
 4.2 寸、300×400 的**全反射**屏，强光下反而更清楚，画面不变时几乎不耗电。
+和电子墨水屏不同，它刷新得足够快，可以画实时曲线——实测满屏刷新能稳定跑到约 58 fps。
 
 <!-- 把实物照片放到 docs/screenshot.jpg 就会显示在这里 -->
 ![仪表盘运行在板子上](docs/screenshot.jpg)
@@ -38,8 +39,8 @@
 ## 快速开始
 
 ```bash
-git clone https://github.com/<you>/rlcd-dashboard.git
-cd rlcd-dashboard
+git clone https://github.com/<you>/waveshare-esp32-s3-rlcd-4.2-dashboard.git
+cd waveshare-esp32-s3-rlcd-4.2-dashboard
 
 # 1) Arduino ESP32 工具链 + U8g2（约 890 MB，可断点续传）
 scripts/fetch-toolchain.sh

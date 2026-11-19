@@ -1,13 +1,15 @@
-# RLCD Dashboard
+# Waveshare ESP32-S3-RLCD-4.2 Dashboard
 
 **English** · [简体中文](README.zh-CN.md)
 
-Stream this machine's CPU, memory, network and ambient-sound levels to a
-[Waveshare ESP32-S3-RLCD-4.2](https://www.waveshare.com/esp32-s3-rlcd-4.2.htm) —
-a 4.2", 300×400 **reflective** LCD that stays readable in direct sunlight and
-draws almost nothing when nothing changes.
+A real-time CPU / memory / network / ambient-sound monitor for the
+[Waveshare ESP32-S3-RLCD-4.2](https://www.waveshare.com/esp32-s3-rlcd-4.2.htm)
+development board. That board carries a 4.2", 300×400 **reflective** LCD: it
+stays readable in direct sunlight and draws almost nothing when the image is
+static, which makes it a good always-on status panel. Unlike e-paper it also
+refreshes fast enough for live graphs — the panel sustains roughly 58 full-frame
+updates per second.
 
-<!-- Drop a photo at docs/screenshot.jpg and it shows up here. -->
 ![The dashboard running on the board](docs/screenshot.jpg)
 
 A small host daemon (Rust, ~0.5 % of one core, 2.6 MB RSS) samples `/proc` and
@@ -42,8 +44,8 @@ No wiring is needed — everything above is on the board.
 ## Quick start
 
 ```bash
-git clone https://github.com/<you>/rlcd-dashboard.git
-cd rlcd-dashboard
+git clone https://github.com/<you>/waveshare-esp32-s3-rlcd-4.2-dashboard.git
+cd waveshare-esp32-s3-rlcd-4.2-dashboard
 
 # 1. Arduino ESP32 toolchain + U8g2 (downloads ~890 MB, resumable)
 scripts/fetch-toolchain.sh
